@@ -23,13 +23,14 @@ namespace pos_show
         System.Windows.Forms.Timer tmr;
 
         FramesPainter painter;
-
+        FrameParser parser;
 
         public Form1()
         {
             InitializeComponent();
 
             painter = new FramesPainter();
+            parser = new FrameParser(',', 16);
 
             var args = Environment.GetCommandLineArgs();
             var prms = new TextBox[] { tb_port, tb_scale, tb_size };
@@ -172,7 +173,7 @@ namespace pos_show
                 try
                 {
                     var str = port.ReadLine();
-                    var frm = FrameParserH.Parse(str);
+                    var frm = parser.Parse(str);
                     lock (p_lock)
                     {
                         frames.Ins(frm);
@@ -261,10 +262,11 @@ namespace pos_show
                     str += ", " + r.Next(65535).ToString("X4");
                 }
                 str += "\n";
+                */
 
                 if (!gen_port.IsOpen)
                     return;
-                */
+
                 var str = "1,55,1,5\n";
                 gen_port.Write(str);
                 Thread.Sleep(10);
@@ -339,35 +341,16 @@ namespace pos_show
 
     class FrameParser
     {
-        static readonly char[] splitter = new char[] { ',' };
+        char[] splitter;
+        int from_base;
 
-        static public Frame Parse(string str)
+        public FrameParser(char splitter, int from_base)
         {
-            var items = str.Split(splitter, StringSplitOptions.None);
-
-            var cnt = items.Length / 2;
-
-            int x, y;
-            var f = new Frame();
-            for (int i = 0; i < cnt; i++)
-            {
-                x = 0;
-                y = 0;
-                int.TryParse(items[i * 2], out x);
-                int.TryParse(items[i * 2 + 1], out y);
-
-                f.Add(new Point(x, y));
-            }
-
-            return f;
+            this.splitter = new char[] { splitter };
+            this.from_base = from_base;
         }
-    }
 
-    class FrameParserH
-    {
-        static readonly char[] splitter = new char[] { ',' };
-
-        static public Frame Parse(string str)
+        public Frame Parse(string str)
         {
             var items = str.Split(splitter, StringSplitOptions.None);
 
@@ -377,8 +360,8 @@ namespace pos_show
             var f = new Frame();
             for (int i = 0; i < cnt; i++)
             {
-                x = Convert.ToInt32(items[i * 2 + 0].Trim(), 16);
-                y = Convert.ToInt32(items[i * 2 + 1].Trim(), 16);
+                x = Convert.ToInt32(items[i * 2 + 0].Trim(), from_base);
+                y = Convert.ToInt32(items[i * 2 + 1].Trim(), from_base);
 
                 f.Add(new Point(x, y));
             }
