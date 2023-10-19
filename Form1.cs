@@ -172,7 +172,7 @@ namespace pos_show
                 try
                 {
                     var str = port.ReadLine();
-                    var frm = FrameParser.Parse(str);
+                    var frm = FrameParserH.Parse(str);
                     lock (p_lock)
                     {
                         frames.Ins(frm);
@@ -317,14 +317,14 @@ namespace pos_show
             brushes = new Brush[depth];
             for (int i = 0; i < depth; i++)
             {
-                var tmp = 255 / depth * i;
+                var tmp = 255 / (depth-1) * i;
                 brushes[i] = new SolidBrush(Color.FromArgb(tmp, tmp, tmp));
             }
         }
 
         public void Draw(Frames f, Graphics g)
         {
-            g.Clear(Color.White);
+            //g.Clear(Color.White);
             for (var i = 0; i < f.Count; i++)
             {
                 foreach (var p in f[i])
@@ -353,6 +353,30 @@ namespace pos_show
                 y = 0;
                 int.TryParse(items[i * 2], out x);
                 int.TryParse(items[i * 2 + 1], out y);
+
+                f.Add(new Point(x, y));
+            }
+
+            return f;
+        }
+    }
+
+    class FrameParserH
+    {
+        static readonly char[] splitter = new char[] { ',' };
+
+        static public Frame Parse(string str)
+        {
+            var items = str.Split(splitter, StringSplitOptions.None);
+
+            var cnt = items.Length / 2;
+
+            int x, y;
+            var f = new Frame();
+            for (int i = 0; i < cnt; i++)
+            {
+                x = Convert.ToInt32(items[i * 2 + 0], 16);
+                y = Convert.ToInt32(items[i * 2 + 1], 16);
 
                 f.Add(new Point(x, y));
             }

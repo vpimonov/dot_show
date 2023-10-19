@@ -157,6 +157,7 @@
             // 
             // plotter
             // 
+            this.plotter.BackColor = System.Drawing.Color.White;
             this.plotter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.plotter.Location = new System.Drawing.Point(0, 32);
             this.plotter.Margin = new System.Windows.Forms.Padding(2);
