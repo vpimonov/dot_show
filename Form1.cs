@@ -254,6 +254,7 @@ namespace pos_show
 
             for (int i = 0; i < 1000; i++)
             {
+                /*
                 var str = r.Next(65535).ToString("X4");
                 for (int j = 0; j < 99; j++)
                 {
@@ -263,7 +264,8 @@ namespace pos_show
 
                 if (!gen_port.IsOpen)
                     return;
-
+                */
+                var str = "1,55,1,5\n";
                 gen_port.Write(str);
                 Thread.Sleep(10);
             }
@@ -325,11 +327,11 @@ namespace pos_show
         public void Draw(Frames f, Graphics g)
         {
             //g.Clear(Color.White);
-            for (var i = 0; i < f.Count; i++)
+            for (var i = f.Count-1; i >= 0; i--)
             {
                 foreach (var p in f[i])
                 {
-                    g.FillRectangle(brushes[i], p.X / scale_denominator - dot_size / 2, g.VisibleClipBounds.Height - p.Y / scale_denominator - dot_size / 2, dot_size, dot_size);
+                    g.FillRectangle(brushes[i], p.X / scale_denominator, g.VisibleClipBounds.Height - p.Y / scale_denominator, dot_size, dot_size);
                 }
             }
         }
