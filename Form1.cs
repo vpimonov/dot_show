@@ -39,9 +39,9 @@ namespace pos_show
 
             int tmp = 0;
             if (args.Length > 4 && int.TryParse(args[4], out tmp))
-                painter = new FramesPainter(tmp);
+                painter = new FramesPainter(tmp+1);
             else
-                painter = new FramesPainter(1);
+                painter = new FramesPainter(2);
 
             if (args.Length > 5)
             {
@@ -254,10 +254,10 @@ namespace pos_show
 
             for (int i = 0; i < 1000; i++)
             {
-                var str = r.Next(65535).ToString();
+                var str = r.Next(65535).ToString("X4");
                 for (int j = 0; j < 99; j++)
                 {
-                    str += ", " + r.Next(65535).ToString();
+                    str += ", " + r.Next(65535).ToString("X4");
                 }
                 str += "\n";
 
@@ -307,7 +307,7 @@ namespace pos_show
         public int dot_size { get; set; }
 
         public FramesPainter()
-            : this(1)
+            : this(2)
         {
         }
 
@@ -375,8 +375,8 @@ namespace pos_show
             var f = new Frame();
             for (int i = 0; i < cnt; i++)
             {
-                x = Convert.ToInt32(items[i * 2 + 0], 16);
-                y = Convert.ToInt32(items[i * 2 + 1], 16);
+                x = Convert.ToInt32(items[i * 2 + 0].Trim(), 16);
+                y = Convert.ToInt32(items[i * 2 + 1].Trim(), 16);
 
                 f.Add(new Point(x, y));
             }
