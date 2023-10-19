@@ -37,7 +37,6 @@
             this.btn_Test = new System.Windows.Forms.Button();
             this.tb_scale = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.btn_close = new System.Windows.Forms.Button();
             this.btn_open = new System.Windows.Forms.Button();
             this.plotter = new System.Windows.Forms.Panel();
             this.panel1.SuspendLayout();
@@ -46,7 +45,7 @@
             // tb_port
             // 
             this.tb_port.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tb_port.Location = new System.Drawing.Point(32, 6);
+            this.tb_port.Location = new System.Drawing.Point(32, 5);
             this.tb_port.Margin = new System.Windows.Forms.Padding(2);
             this.tb_port.Name = "tb_port";
             this.tb_port.Size = new System.Drawing.Size(109, 20);
@@ -71,7 +70,6 @@
             this.panel1.Controls.Add(this.btn_Test);
             this.panel1.Controls.Add(this.tb_scale);
             this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.btn_close);
             this.panel1.Controls.Add(this.btn_open);
             this.panel1.Controls.Add(this.tb_port);
             this.panel1.Controls.Add(this.label1);
@@ -85,7 +83,7 @@
             // lbl_frame
             // 
             this.lbl_frame.AutoSize = true;
-            this.lbl_frame.Location = new System.Drawing.Point(436, 9);
+            this.lbl_frame.Location = new System.Drawing.Point(371, 8);
             this.lbl_frame.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_frame.Name = "lbl_frame";
             this.lbl_frame.Size = new System.Drawing.Size(13, 13);
@@ -94,7 +92,8 @@
             // 
             // tb_size
             // 
-            this.tb_size.Location = new System.Drawing.Point(401, 5);
+            this.tb_size.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tb_size.Location = new System.Drawing.Point(336, 5);
             this.tb_size.Margin = new System.Windows.Forms.Padding(2);
             this.tb_size.Name = "tb_size";
             this.tb_size.Size = new System.Drawing.Size(27, 20);
@@ -105,7 +104,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(352, 9);
+            this.label3.Location = new System.Drawing.Point(287, 8);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(45, 13);
@@ -126,7 +125,8 @@
             // 
             // tb_scale
             // 
-            this.tb_scale.Location = new System.Drawing.Point(317, 6);
+            this.tb_scale.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tb_scale.Location = new System.Drawing.Point(252, 5);
             this.tb_scale.Margin = new System.Windows.Forms.Padding(2);
             this.tb_scale.Name = "tb_scale";
             this.tb_scale.Size = new System.Drawing.Size(27, 20);
@@ -137,23 +137,12 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(273, 9);
+            this.label2.Location = new System.Drawing.Point(208, 8);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(48, 13);
             this.label2.TabIndex = 5;
             this.label2.Text = "Scale 1/";
-            // 
-            // btn_close
-            // 
-            this.btn_close.Location = new System.Drawing.Point(209, 2);
-            this.btn_close.Margin = new System.Windows.Forms.Padding(2);
-            this.btn_close.Name = "btn_close";
-            this.btn_close.Size = new System.Drawing.Size(56, 24);
-            this.btn_close.TabIndex = 2;
-            this.btn_close.Text = "Close";
-            this.btn_close.UseVisualStyleBackColor = true;
-            this.btn_close.Click += new System.EventHandler(this.btn_close_Click);
             // 
             // btn_open
             // 
@@ -185,7 +174,7 @@
             this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "dot_show";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -199,7 +188,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TextBox tb_scale;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button btn_close;
         private System.Windows.Forms.Button btn_open;
         private System.Windows.Forms.Panel plotter;
         private System.Windows.Forms.Button btn_Test;

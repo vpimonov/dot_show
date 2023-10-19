@@ -16,41 +16,40 @@ namespace pos_show
     {
         SerialPort gen_port;
         SerialPort port;
-        List<Point> points;
-        int dot_size;
+        Frames frames;
         int n_frame;
         object p_lock = new object();
-        float scale_denominator;
         bool new_data = false;
         System.Windows.Forms.Timer tmr;
+
+        FramesPainter painter;
+
 
         public Form1()
         {
             InitializeComponent();
 
+            painter = new FramesPainter();
+
             var args = Environment.GetCommandLineArgs();
-            if (args.Length > 1)
-            {
-                tb_port.Text = args[1];
-            }
+            var prms = new TextBox[] { tb_port, tb_scale, tb_size };
 
-            if (args.Length > 2)
-            {
-                tb_scale.Text = args[2];
-            }
+            for (int i = 0; i < args.Length-1; i++)
+                if (i < prms.Length) prms[i].Text = args[i+1];
 
-            if (args.Length > 3)
-            {
-                tb_size.Text = args[3];
-            }
+            int tmp = 0;
+            if (args.Length > 4 && int.TryParse(args[4], out tmp))
+                painter = new FramesPainter(tmp);
+            else
+                painter = new FramesPainter(1);
 
-            if (args.Length > 4)
+            if (args.Length > 5)
             {
-                gen_port = CreatePort(args[4]);
+                gen_port = CreatePort(args[5]);
                 btn_Test.Visible = true;
             }
 
-            points = new List<Point>();
+            frames = new Frames(painter.depth);
             set_scale();
             set_size();
 
@@ -143,7 +142,11 @@ namespace pos_show
         private void btn_open_Click(object sender, EventArgs e)
         {
             if (port != null && port.IsOpen)
+            {
+                btn_open.Text = "Open";
                 port.Close();
+                return;
+            }
 
             try
             {
@@ -151,25 +154,14 @@ namespace pos_show
                 port.Open();
                 n_frame = 0;
                 port.NewLine = "\n";
-                btn_open.Enabled = false;
-                btn_close.Enabled = true;
                 ThreadPool.QueueUserWorkItem(reader);
+                btn_open.Text = "Close";
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 port = null;
             }
-
-        }
-
-        private void btn_close_Click(object sender, EventArgs e)
-        {
-            if (port != null && port.IsOpen)
-                port.Close();
-
-            btn_open.Enabled = true;
-            btn_close.Enabled = false;
         }
 
         private void reader(object state)
@@ -180,22 +172,10 @@ namespace pos_show
                 try
                 {
                     var str = port.ReadLine();
-                    var items = str.Split(splitter, StringSplitOptions.None);
-
-                    var cnt = items.Length / 2;
-
-                    int x, y;
-                    var pnts = new List<Point>(cnt);
-                    for (int i = 0; i < cnt; i++)
-                    {
-                        if (int.TryParse(items[i * 2], out x) && int.TryParse(items[i * 2 + 1], out y))
-                            pnts.Add(new Point(x, y));
-                        else
-                            Log(string.Format("Error convert {0} pair to point: {1}, {2}", i, items[i * 2], items[i * 2 + 1]));
-                    }
+                    var frm = FrameParser.Parse(str);
                     lock (p_lock)
                     {
-                        points = pnts;
+                        frames.Ins(frm);
                     }
                     new_data = true;
                 }
@@ -204,6 +184,8 @@ namespace pos_show
                     break;
                 }
             }
+
+            Invoke(new Action(() => { btn_open.Text = "Open"; }));
         }
 
         private void Log(string msg)
@@ -215,7 +197,7 @@ namespace pos_show
             float s = 0;
             if (float.TryParse(tb_scale.Text, out s) && s > 0)
             {
-                scale_denominator = s;
+                painter.scale_denominator = s;
                 new_data = true;
             }
         }
@@ -225,7 +207,7 @@ namespace pos_show
             int s = 0;
             if (int.TryParse(tb_size.Text, out s) && s > 0 && s < 10)
             {
-                dot_size = s;
+                painter.dot_size = s;
                 new_data = true;
             }
         }
@@ -234,13 +216,9 @@ namespace pos_show
         {
             using (var gfx = plotter.CreateGraphics())
             {
-                gfx.Clear(Color.White);
                 lock (p_lock)
                 {
-                    foreach (var p in points)
-                    {
-                        gfx.FillRectangle(Brushes.Black, p.X / scale_denominator - dot_size / 2, plotter.Height - p.Y / scale_denominator - dot_size/2, dot_size, dot_size);
-                    }
+                    painter.Draw(frames, gfx);
                 }
             }
         }
@@ -287,10 +265,99 @@ namespace pos_show
                     return;
 
                 gen_port.Write(str);
-                Thread.Sleep(100);
+                Thread.Sleep(10);
             }
 
             gen_port.Close();
+
+            Invoke(new Action(() => { btn_Test.Text = "G"; }));
+        }
+    }
+
+    class Frame : List<Point>
+    {
+    }
+
+    class Frames : List<Frame>
+    {
+        int depth;
+
+        public Frames(int depth)
+        {
+            this.depth = depth;
+        }
+
+        public void Ins(Frame f)
+        {
+            while (Count >= depth)
+            {
+                RemoveAt(Count - 1);
+            }
+
+            Insert(0, f);
+        }
+    }
+
+    class FramesPainter
+    {
+        Brush[] brushes;
+        public int depth { get; private set; }
+
+        public float scale_denominator { get; set; }
+        public int dot_size { get; set; }
+
+        public FramesPainter()
+            : this(1)
+        {
+        }
+
+        public FramesPainter(int depth)
+        {
+            this.depth = depth;
+            brushes = new Brush[depth];
+            for (int i = 0; i < depth; i++)
+            {
+                var tmp = 255 / depth * i;
+                brushes[i] = new SolidBrush(Color.FromArgb(tmp, tmp, tmp));
+            }
+        }
+
+        public void Draw(Frames f, Graphics g)
+        {
+            g.Clear(Color.White);
+            for (var i = 0; i < f.Count; i++)
+            {
+                foreach (var p in f[i])
+                {
+                    g.FillRectangle(brushes[i], p.X / scale_denominator - dot_size / 2, g.VisibleClipBounds.Height - p.Y / scale_denominator - dot_size / 2, dot_size, dot_size);
+                }
+            }
+        }
+    }
+
+    class FrameParser
+    {
+        static readonly char[] splitter = new char[] { ',' };
+
+        static public Frame Parse(string str)
+        {
+            var items = str.Split(splitter, StringSplitOptions.None);
+
+            var cnt = items.Length / 2;
+
+            int x, y;
+            var f = new Frame();
+            for (int i = 0; i < cnt; i++)
+            {
+                x = 0;
+                y = 0;
+                int.TryParse(items[i * 2], out x);
+                int.TryParse(items[i * 2 + 1], out y);
+
+                f.Add(new Point(x, y));
+            }
+
+            return f;
         }
     }
 }
